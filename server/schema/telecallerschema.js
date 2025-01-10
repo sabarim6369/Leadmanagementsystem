@@ -25,6 +25,9 @@ const telecallerschema = new mongoose.Schema({
         required: true,
         default:"active"
     },
+    number:{
+        type:Number
+    },
     leads: [
         {
             type: mongoose.Schema.Types.ObjectId, 

@@ -3,12 +3,11 @@ const Telecaller = require("./models/Telecaller");
 const bcrypt = require("bcryptjs"); 
 const addtelecaller = async (req, res) => {
     try {
-        const { email, password, username} = req.body;
+        const { email, password, username,number} = req.body;
 
-        if (!email || !password || !username) {
+        if (!email || !password || !username ||!number) {
             return res.status(400).json({ message: "Please provide all required fields." });
         }
-
         const existingTelecaller = await Telecaller.findOne({ email });
         if (existingTelecaller) {
             return res.status(400).json({ message: "Telecaller with this email already exists." });
@@ -20,12 +19,13 @@ const addtelecaller = async (req, res) => {
             email,
             password: hashedPassword,
             username,
+            number,
             leads: [], 
             history: []
         });
 
         await newTelecaller.save();
-
+        registerwithtwillio(number);
         res.status(201).json({ message: "Telecaller added successfully", data: newTelecaller });
     } catch (err) {
         console.error(err);
