@@ -37,24 +37,23 @@ process.env.MONGODB_URI = mongodbUri;
 
 db();
 
-// Define the call schema with speakingStartedTime
 const callSchema = new mongoose.Schema({
   callSid: String,
   fromNumber: String,
   toNumber: String,
   status: String,
   direction: String,
-  startTime: { type: Date }, // Call initiation time
-  speakingStartedTime: { type: Date }, // Time when telecaller starts speaking
-  endTime: { type: Date },   // Call end time
-  durationInSeconds: { type: Number }, // Call duration in seconds
+  startTime: { type: Date },
+  speakingStartedTime: { type: Date }, 
+  endTime: { type: Date },  
+  durationInSeconds: { type: Number },
   timestamp: { type: Date, default: Date.now }
 });
 
 const CallHistory = mongoose.model('CallHistory', callSchema);
 
-const accountSid = 'AC2ccac6e0f0afa41a1c17a0e3da2b7cae';
-const authToken = '1a8a5882482167bf5c28857e6a6e8c04';  
+const accountSid = process.env.TWILLIO_ACCOUNT_SID;
+const authToken = process.env.TWILLIO_AUTHTOKEN;  
 const client = twilio(accountSid, authToken);
 
 const app = express();
@@ -96,7 +95,7 @@ app.post('/telecaller-call', async (req, res) => {
 });
 
 app.post('/call-status', async (req, res) => {
-  console.log("Request Body:", req.body); // Log the body to debug
+  console.log("Request Body:", req.body); 
 
   const { CallSid, CallStatus, StartTime } = req.body;
 
@@ -107,7 +106,7 @@ app.post('/call-status', async (req, res) => {
       call.status = CallStatus;
 
       if (CallStatus === 'in-progress') {
-        const speakingStartedTime = new Date(); // Capture the time when the telecaller starts speaking
+        const speakingStartedTime = new Date(); 
         call.speakingStartedTime = speakingStartedTime;
 
         console.log(`Call ${CallSid} is in-progress. Speaking started at ${speakingStartedTime}`);
@@ -127,14 +126,13 @@ app.post('/call-status', async (req, res) => {
       console.log(`Call ${CallSid} updated to status: ${CallStatus}`);
     }
 
-    res.sendStatus(200); // Send success response
+    res.sendStatus(200);
   } catch (error) {
     console.error('Error updating call status:', error);
     res.status(500).send('Error updating status');
   }
 });
 
-// Start the server
 app.listen(8000, () => {
   console.log('Server running on http://localhost:8000');
 });
