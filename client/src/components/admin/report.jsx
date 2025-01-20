@@ -57,7 +57,7 @@ const Report = () => {
                       </div>
                     </td>
                     <td className="py-2 px-4">
-                      <div className="pt-1 pb-1 pl-4 pr-4 border-2 border-blue-500 bg-neutral-800 text-blue-500 shadow-md w-max rounded text-center cursor-pointer">
+                      <div className="pt-1 pb-1 pl-4 pr-4 border-2 border-blue-500 bg-neutral-800 text-blue-500 shadow-md w-max rounded text-center cursor-pointer hover:bg-red-700">
                         View
                       </div>
                     </td>

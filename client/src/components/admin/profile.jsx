@@ -17,7 +17,6 @@ const Profile = () => {
       <div className="flex-grow p-6 flex flex-col space-y-6">
         <h1 className="text-white text-2xl font-bold">Telecaller Profile</h1>
 
-        {/* Profile Header Section */}
         <div className="w-full bg-[#1f1f1f] h-[30%] rounded-2xl p-6 flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="w-20 h-20 rounded-full border-4 border-yellow-400 flex items-center justify-center">
@@ -32,9 +31,7 @@ const Profile = () => {
           <button className="bg-gray-600 text-white px-4 py-2 rounded-lg">Edit</button>
         </div>
 
-        {/* Content Section */}
         <div className="flex flex-grow space-x-4">
-          {/* Caller History Section */}
           <div className="w-1/2 bg-[#1f1f1f] rounded-2xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-white text-xl font-bold">Caller History</h2>
@@ -57,7 +54,6 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* History Table */}
             <table className="w-full text-white">
               <thead>
                 <tr>
@@ -90,12 +86,10 @@ const Profile = () => {
             </table>
           </div>
 
-          {/* Status and Total Calls Section */}
           <div className="flex flex-col flex-grow space-y-4">
             <div className="flex-grow bg-[#1f1f1f] rounded-2xl p-6">
               <h2 className="text-white text-xl font-bold mb-4">Status</h2>
               <div className="h-full flex items-center justify-center">
-                {/* Example Bar Chart Placeholder */}
                 <div className="w-full h-32 bg-gray-800 rounded flex items-end justify-around p-2">
                   <div className="bg-red-500 w-8 h-24"></div>
                   <div className="bg-green-500 w-8 h-16"></div>
@@ -108,7 +102,6 @@ const Profile = () => {
             <div className="flex-grow bg-[#1f1f1f] rounded-2xl p-6">
               <h2 className="text-white text-xl font-bold mb-4">Total Calls</h2>
               <div className="h-full flex flex-col items-center justify-center space-y-4">
-                {/* Example Pie Chart Placeholder */}
                 <div className="w-32 h-32 bg-blue-500 rounded-full flex items-center justify-center relative">
                   <div className="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center">
                     <span className="text-white text-lg font-bold">56</span>
