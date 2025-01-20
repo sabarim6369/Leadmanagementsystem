@@ -1,10 +1,11 @@
 import React from 'react';
-import { Route, Routes, BrowserRouter } from "react-router-dom"; // Ensure BrowserRouter is imported
+import { Route, Routes, BrowserRouter } from "react-router-dom"; 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Sidebar from './utils/sidebar';
-import Profile from './components/admin/profile'
-import Dashboard from './components/admin/dashboard';
-import Report from './components/admin/report'
+import Profile from './components/admin/Profile/Profile'
+import Dashboard from './components/admin/Dashboard/Dashboard';
+import Report from './components/admin/Report/Report'
+import TelecallersDashboard from './components/telecaller/Dashboard/Dashboard';
 const App = () => {
   return (
     <BrowserRouter> 

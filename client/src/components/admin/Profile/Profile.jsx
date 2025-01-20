@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Sidebar from "../../utils/sidebar";
+import Sidebar from "../../../utils/sidebar";
 
 const Profile = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

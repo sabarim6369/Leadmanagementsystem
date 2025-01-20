@@ -90,7 +90,6 @@ app.post('/telecaller-call', async (req, res) => {
   const { telecallerPhoneNumber, leadPhoneNumber } = req.body;
 
   await initiateOutgoingCall(telecallerPhoneNumber, leadPhoneNumber);
-
   res.status(200).json({ message: 'Call initiated and logged automatically' });
 });
 

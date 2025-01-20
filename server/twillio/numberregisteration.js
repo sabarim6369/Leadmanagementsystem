@@ -10,7 +10,7 @@ const authToken = 'your_auth_token';
 const client = twilio(accountSid, authToken);
 
 app.post('/add-staff', async (req, res) => {
-  const { name, phoneNumber } = req.body; // Get data from frontend
+  const { name, phoneNumber } = req.body; 
 
   if (!name || !phoneNumber) {
     return res.status(400).json({ message: 'Name and phone number are required.' });

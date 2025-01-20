@@ -1,4 +1,4 @@
-import Sidebar from "../../utils/sidebar";
+import Sidebar from "../../../utils/sidebar";
 import { useState,useEffect } from "react";
 const Report = () => {
   const [rows,setrows]=useState([]);
