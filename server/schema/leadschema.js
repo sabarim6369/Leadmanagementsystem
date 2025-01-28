@@ -3,6 +3,11 @@ const leadschema=new mongoose.Schema({
     name:{
         type:String
     },
+    admin: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin',  
+        required: true,
+      },
     mobilenumber:{
         type:Number
     },

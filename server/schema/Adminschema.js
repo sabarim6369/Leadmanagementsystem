@@ -1,8 +1,11 @@
 const mongoose=require("mongoose");
-const authenticationschema=new mongoose.Schema({
+const Adminschema=new mongoose.Schema({
     email:{
         type:String,
         required:true
+    },
+    databaseName:{
+type:String
     },
     password:{
         type:String,
@@ -10,7 +13,7 @@ const authenticationschema=new mongoose.Schema({
     },
     role:{
         type:String,
-        enum:["superadmin","admin"]
+        enum:["admin"]
     },
     username:{
         type:String,
@@ -21,5 +24,5 @@ const authenticationschema=new mongoose.Schema({
         enum:["active","inactive","paused"]
     }
 })
-const authentication=mongoose.model("Authentication",authenticationschema)
+const authentication=mongoose.model("Admin",Adminschema)
 module.exports=authentication

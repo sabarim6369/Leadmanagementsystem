@@ -5,8 +5,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const accountSid = 'your_account_sid';
-const authToken = 'your_auth_token';
+const accountSid =process.env.TWILLIO_ACCOUNT_SID;
+const authToken = process.env.TWILLIO_AUTHTOKEN;
 const client = twilio(accountSid, authToken);
 
 app.post('/add-staff', async (req, res) => {

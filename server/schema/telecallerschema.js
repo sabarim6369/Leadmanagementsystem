@@ -5,6 +5,11 @@ const telecallerschema = new mongoose.Schema({
         type: String,
         required: true
     },
+    admin: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin', 
+        required: true,
+      },
     password: {
         type: String,
         required: true

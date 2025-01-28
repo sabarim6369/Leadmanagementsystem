@@ -1,41 +1,22 @@
-// const express = require("express");
-// const mongoose = require("mongoose");
-// require("dotenv").config();
-// const db = require("./config/db");
-
-// const app = express();
-// app.use(express.json());
-
-// const mongodbUri = process.env.MONGODB_URI.replace(
-//   "superadmin",
-//   process.env.DATABASE_NAME
-// );
-
-
-// process.env.MONGODB_URI = mongodbUri;
-
-// db(); 
-// app.get("/",(req,res)=>{
-// res.send("hello")
-// })
-// app.listen(8000, () => {
-//   console.log("Server is running on port 8000");
-// });
-
-
-
 const express = require('express');
 const twilio = require('twilio');
 const mongoose = require('mongoose');
 require("dotenv").config();
-const db = require("./config/db");
+const {connectToDatabase} = require("./config/db");
+const adminrouter=require("./routers/adminRoutes");
+const superadminrouter=require("./routers/superadminRoute");
+const telecallerroute=require("./routers/telecallerRoutes");
 const mongodbUri = process.env.MONGODB_URI.replace(
   "superadmin",
   process.env.DATABASE_NAME
 );
 process.env.MONGODB_URI = mongodbUri;
-
-db();
+const app = express();
+app.use(express.json())
+connectToDatabase(process.env.MONGODB_URI);
+app.use("/api/superadmin",superadminrouter)
+app.use("/api/admin",adminrouter)
+app.use("/api/telecaller",telecallerroute)
 
 const callSchema = new mongoose.Schema({
   callSid: String,
@@ -54,37 +35,27 @@ const CallHistory = mongoose.model('CallHistory', callSchema);
 
 const accountSid = process.env.TWILLIO_ACCOUNT_SID;
 const authToken = process.env.TWILLIO_AUTHTOKEN;  
+console.log("⭐⭐⭐⭐",accountSid)
 const client = twilio(accountSid, authToken);
 
-const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 const initiateOutgoingCall = async (telecallerPhoneNumber, leadPhoneNumber) => {
   try {
     const startTime = new Date(); 
     const call = await client.calls.create({
-      url: ' https://12e6-43-250-42-50.ngrok-free.app/voice.xml', 
+      url: "https://55b5-43-250-42-50.ngrok-free.app/voice.xml",
       to: leadPhoneNumber,
-      from: telecallerPhoneNumber, 
-      statusCallback: ' https://12e6-43-250-42-50.ngrok-free.app/call-status', 
-      statusCallbackEvent: ['initiated', 'in-progress', 'completed', 'busy', 'failed']
+      from: telecallerPhoneNumber,
+      statusCallback: "https://55b5-43-250-42-50.ngrok-free.app/call-status",
+      statusCallbackEvent: ["completed"] 
     });
-
-    const callHistory = new CallHistory({
-      callSid: call.sid,
-      fromNumber: telecallerPhoneNumber,
-      toNumber: leadPhoneNumber,
-      status: 'initiated', 
-      direction: 'outgoing',
-      startTime: startTime,
-    });
-    await callHistory.save();
-
-    console.log('Call initiated and history saved');
+    console.log("Initiated the call:", call);
   } catch (error) {
-    console.error('Error initiating outgoing call:', error);
+    console.error("Error initiating outgoing call:", error.message, error.details);
   }
 };
+
 
 app.post('/telecaller-call', async (req, res) => {
   const { telecallerPhoneNumber, leadPhoneNumber } = req.body;

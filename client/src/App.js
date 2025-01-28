@@ -6,6 +6,7 @@ import Profile from './components/admin/Profile/Profile'
 import Dashboard from './components/admin/Dashboard/Dashboard';
 import Report from './components/admin/Report/Report'
 import TelecallersDashboard from './components/telecaller/Dashboard/Dashboard';
+import Telecallers from './components/admin/Telecallers/Telecallers';
 const App = () => {
   return (
     <BrowserRouter> 
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/report" element={<Report/>}/>
+        <Route path="/telecallers" element={<Telecallers/>}/>
       </Routes>
     </BrowserRouter>
   );

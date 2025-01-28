@@ -10,7 +10,7 @@ const Callinsights = () => {
         { name: 'May', value: 300 },
         { name: 'Jun', value: 400 },
         { name: 'Jul', value: 600 },
-        { name: 'Aug', value: 400 },
+        { name: 'Aug', value: 400 },  
         { name: 'Sep', value: 500 },
         { name: 'Oct', value: 450 },
         { name: 'Nov', value: 550 },

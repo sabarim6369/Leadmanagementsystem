@@ -9,7 +9,6 @@ const Fullfilment = () => {
         { name: 'May', value: 6000, value2: 5800 },
         { name: 'Jun', value: 5500, value2: 5000 }
       ];
-    
   return (
 <div className="w-full lg:w-[30%] bg-gray-700 rounded-2xl p-4">
             <h1 className="text-white text-xl font-bold mb-4">Fulfilment</h1>

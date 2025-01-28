@@ -10,7 +10,7 @@ const Sidebar = () => {
         const path=window.location.pathname;
         if(path==="/dashboard") return 0;
         if(path==="/profile") return 1;
-        if(path==="/leaderboard") return 2;
+        if(path==="/telecallers") return 2;
         if(path==="/report") return 3;
         if(path==="/messages") return 4;
         if(path==="/settings") return 5;
@@ -29,7 +29,7 @@ const Sidebar = () => {
             if (currentPath !== "/profile") navigate("/profile");
             break;
           case 2:
-            if (currentPath !== "/leaderboard") navigate("/leaderboard");
+            if (currentPath !== "/telecallers") navigate("/telecallers");
             break;
           case 3:
             if (currentPath !== "/report") navigate("/report");
@@ -52,12 +52,12 @@ const Sidebar = () => {
         <>
             <div className="relative h-screen m-0 p-0">
                 <button
-                    className={`lg:hidden absolute top-4 left-4 p-2 rounded-full ${
-                        isOpen ? 'text-white' : 'text-black'
+                    className={`lg:hidden absolute top-4 left-4 p-2 rounded-full mt-1 ${
+                        isOpen ? 'text-white' : 'text-white'
                     } z-20`}
                     onClick={togglesidebar}
                 >
-                    ☰
+                   <i className='fa fa-bars'></i>
                 </button>
                 <div
                     className={`w-[250px] h-full bg-[rgba(23,24,33,1)] fixed top-0 left-0 z-10 transition-all duration-300 ease-in-out ${
@@ -74,8 +74,8 @@ const Sidebar = () => {
                             <h2 className={`text-white text-2xl  ${select===1?'font-bold text-black':'text-white'}`}>Profile</h2>
                         </div>
                         <div onClick={()=>setselect(2)} className={`flex items-center cursor-pointer ${select===2?'bg-mint-green p-3 rounded':'text-white'}`}>
-                            <i className={`fas fa-trophy fa-2x mr-4 text-gray-500 group-hover:text-blue-500 ${select===2?'text-black':'text-grey'}`}></i>
-                            <h2 className={`text-white text-2xl  ${select===2?'font-bold text-black':'text-white'}`}>Leaderboard</h2>
+                            <i className={`fas fa-phone fa-2x mr-4 text-gray-500 group-hover:text-blue-500 ${select===2?'text-black':'text-grey'}`}></i>
+                            <h2 className={`text-white text-2xl  ${select===2?'font-bold text-black':'text-white'}`}>Telecallers</h2>
                         </div>
                         <div onClick={()=>setselect(3)} className={`flex items-center cursor-pointer ${select===3?'bg-mint-green p-3 rounded':'text-white'}`}>
                             <i className={`fas fa-chart-line fa-2x mr-4 text-gray-500 group-hover:text-blue-500 ${select===3?'text-black':'text-grey'}`}></i>

@@ -9,7 +9,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[#121212]">
+    <div className="flex h-screen">
       <div className="lg:w-[250px] w-0">
         <Sidebar />
       </div>
