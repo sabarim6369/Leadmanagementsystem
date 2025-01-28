@@ -4,20 +4,22 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Admin = require('../schema/Adminschema');
 const mongoose = require('mongoose');
-const {connectToDatabase} = require('../config/db');  // Import the connection handler
-
+const {connectToDatabase} = require('../config/db'); 
 const login = async (req, res) => {
     const { email, password } = req.body;
-
+console.log(req.body)
     if (!email || !password) {
         return res.status(400).json({ message: "Please provide email and password." });
     }
 
     try {
+        
+        const adminDbUri1 =process.env.MONGODB_SUPERADMINURI;
+        await connectToDatabase(adminDbUri1);
         const admin = await Admin.findOne({ email });
 
         if (!admin) {
-            return res.status(400).json({ message: "Admin not found." });
+            return res.status(401).json({ message: "Admin not found." });
         }
 
         const isMatch = await bcrypt.compare(password, admin.password);
@@ -28,7 +30,7 @@ const login = async (req, res) => {
         const databaseName = admin.databaseName;
 
         const adminDbUri = process.env.MONGODB_URI.replace("<Database>", databaseName);
-
+console.log(adminDbUri)
         await connectToDatabase(adminDbUri);
 
         const token = jwt.sign({ adminId: admin._id, databaseName }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -42,14 +44,14 @@ const login = async (req, res) => {
 
 const addtelecaller = async (req, res) => {
     try {
-        const { email, password, username, number, adminId } = req.body;  
+        const { email, password, username, number,address, adminId } = req.body;  
         if (!email || !password || !username || !number || !adminId) {
-            return res.status(400).json({ message: "Please provide all required fields." });
+            return res.status(401).json({ message: "Please provide all required fields." });
         }
 
         const existingTelecaller = await Telecaller.findOne({ email });
         if (existingTelecaller) {
-            return res.status(400).json({ message: "Telecaller with this email already exists." });
+            return res.status(402).json({ message: "Telecaller with this email already exists." });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -59,6 +61,7 @@ const addtelecaller = async (req, res) => {
             password: hashedPassword,
             username,
             number,
+            address,
             admin: adminId, 
             leads: [],
             history: []
@@ -67,7 +70,7 @@ const addtelecaller = async (req, res) => {
         await newTelecaller.save();
        
 
-        res.status(201).json({ message: "Telecaller added successfully", data: newTelecaller });
+        res.status(200).json({ message: "Telecaller added successfully", data: newTelecaller });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error adding telecaller", error: err });

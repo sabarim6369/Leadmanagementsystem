@@ -33,6 +33,9 @@ const telecallerschema = new mongoose.Schema({
     number:{
         type:Number
     },
+    address:{
+        type:String
+    },
     leads: [
         {
             type: mongoose.Schema.Types.ObjectId, 

@@ -6,13 +6,13 @@ const {connectToDatabase} = require("./config/db");
 const adminrouter=require("./routers/adminRoutes");
 const superadminrouter=require("./routers/superadminRoute");
 const telecallerroute=require("./routers/telecallerRoutes");
-const mongodbUri = process.env.MONGODB_URI.replace(
-  "superadmin",
-  process.env.DATABASE_NAME
-);
-process.env.MONGODB_URI = mongodbUri;
+const session = require('express-session');
+const cors=require("cors");
+
 const app = express();
-app.use(express.json())
+app.use(express.json());
+
+app.use(cors())
 connectToDatabase(process.env.MONGODB_URI);
 app.use("/api/superadmin",superadminrouter)
 app.use("/api/admin",adminrouter)

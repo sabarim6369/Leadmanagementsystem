@@ -11,26 +11,22 @@ const addadmin = async (req, res) => {
             return res.status(400).json({ message: "Please provide all required fields." });
         }
 
-        // Check if the admin already exists
         const existingAdmin = await Admin.findOne({ email });
         if (existingAdmin) {
             return res.status(400).json({ message: "Admin with this email already exists." });
         }
 
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Generate a unique database name (e.g., using email or admin ID)
         const databaseName = `admin_${email.replace('@', '_').replace('.', '_')}`;
 
-        // Create a new admin
         const newAdmin = new Admin({
             email,
             password: hashedPassword,
             username,
             superadmin: superadminId,
             status: "active",
-            databaseName // Store the database name for future reference
+            databaseName 
         });
 
         await newAdmin.save();
