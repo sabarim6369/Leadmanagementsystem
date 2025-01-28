@@ -1,10 +1,9 @@
 const Lead = require("../schema/leadschema");
-const Telecaller = require("../schema/telecallerschema");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Admin = require('../schema/Adminschema');
 const mongoose = require('mongoose');
-const {connectToDatabase} = require('../config/db'); 
+const {getDatabaseConnection} = require('../config/db'); 
 const login = async (req, res) => {
     const { email, password } = req.body;
 console.log(req.body)
@@ -14,8 +13,9 @@ console.log(req.body)
 
     try {
         
-        const adminDbUri1 =process.env.MONGODB_SUPERADMINURI;
-        await connectToDatabase(adminDbUri1);
+    // const dbLink = process.env.MONGODB_URI.replace('<Database>', "superadmin");
+    
+        const Admin = req.db.model('Admin');
         const admin = await Admin.findOne({ email });
 
         if (!admin) {
@@ -29,9 +29,7 @@ console.log(req.body)
 
         const databaseName = admin.databaseName;
 
-        const adminDbUri = process.env.MONGODB_URI.replace("<Database>", databaseName);
-console.log(adminDbUri)
-        await connectToDatabase(adminDbUri);
+       console.log("dd",databaseName)
 
         const token = jwt.sign({ adminId: admin._id, databaseName }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
@@ -41,6 +39,15 @@ console.log(adminDbUri)
         res.status(500).json({ message: "Error logging in", error: err });
     }
 };
+const getalltelecaller=async(req,res)=>{
+    const Telecaller = req.db.model("Telecaller");
+const alltelecallers=await Telecaller.find();
+if(!alltelecallers){
+    return res.status(400).json({message:"telecaller list is empty."})
+}
+return res.status(200).json({message:"telecallers fetched successfully",alltelecallers})
+
+}
 
 const addtelecaller = async (req, res) => {
     try {
@@ -48,7 +55,7 @@ const addtelecaller = async (req, res) => {
         if (!email || !password || !username || !number || !adminId) {
             return res.status(401).json({ message: "Please provide all required fields." });
         }
-
+const Telecaller=req.db.model("Telecaller")
         const existingTelecaller = await Telecaller.findOne({ email });
         if (existingTelecaller) {
             return res.status(402).json({ message: "Telecaller with this email already exists." });
@@ -220,5 +227,6 @@ module.exports = {
     assignleads,
     swapleads,
     addleads,
-    login
+    login,
+    getalltelecaller
 };

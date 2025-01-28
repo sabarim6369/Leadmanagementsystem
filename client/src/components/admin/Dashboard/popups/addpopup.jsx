@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import decodeToken from './../../../../utils/jwtdecode';
 const Addpopup = ({ popup, setispopupopen, type }) => {
   const [formData, setFormData] = useState({
     username: "",
@@ -20,7 +21,17 @@ const Addpopup = ({ popup, setispopupopen, type }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/api/admin/add", formData);
+      const token=localStorage.getItem("token");
+      console.log(token);
+      const tokenvalidation=decodeToken(token);
+     const adminId=tokenvalidation.adminId;
+     const databaseName=tokenvalidation.databaseName;
+     console.log(adminId,databaseName)
+      const response = await axios.post("http://localhost:8000/api/admin/add", formData,{
+        headers:{
+          "database":databaseName
+        }
+      });
   
       if (response.status === 401) {
         toast.warning("Fill all fields");

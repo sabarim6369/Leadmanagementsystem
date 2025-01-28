@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import decodeToken from "../../../utils/jwtdecode";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,10 +25,16 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      const token=localStorage.getItem("token");
+      console.log(token);
+   
       const response = await axios.post("http://localhost:8000/api/admin/login", {
         email,
         password,
-      });
+      }, {
+        headers: {
+          'database': "superadmin" 
+    }});
 
       if (response.status === 200) {
         console.log(response.data.token)

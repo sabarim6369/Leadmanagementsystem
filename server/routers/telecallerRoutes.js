@@ -1,16 +1,14 @@
 const express = require("express");
 const {
-    updateLeadResult,
-    getAssignedLeads,
-    getTelecallerHistory,
+  updateLeadResult,
+  getAssignedLeads,
+  getTelecallerHistory,
 } = require("../controller/telecaller");
 
 const router = express.Router();
 
-router.post("/update-lead", updateLeadResult);
-
-router.get("/leads/:telecallerId", getAssignedLeads);
-
-router.get("/history/:telecallerId", getTelecallerHistory);
+router.post("/update-lead", (req, res) => updateLeadResult(req, res, req.db));
+router.get("/leads/:telecallerId", (req, res) => getAssignedLeads(req, res, req.db));
+router.get("/history/:telecallerId", (req, res) => getTelecallerHistory(req, res, req.db));
 
 module.exports = router;

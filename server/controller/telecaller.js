@@ -9,12 +9,12 @@ const updateLeadResult = async (req, res) => {
             return res.status(400).json({ message: "Telecaller ID, Lead ID, and action are required." });
         }
 
-        const telecaller = await Telecaller.findById(telecallerId);
+        const telecaller = await req.db.Telecaller.findById(telecallerId);
         if (!telecaller) {
             return res.status(404).json({ message: "Telecaller not found." });
         }
 
-        const lead = await Lead.findById(leadId);
+        const lead = await req.db.Lead.findById(leadId);
         if (!lead) {
             return res.status(404).json({ message: "Lead not found." });
         }
@@ -42,13 +42,11 @@ const updateLeadResult = async (req, res) => {
     }
 };
 
-
-
 const getAssignedLeads = async (req, res) => {
     try {
         const { telecallerId } = req.params;
 
-        const telecaller = await Telecaller.findById(telecallerId).populate("leads");
+        const telecaller = await req.db.Telecaller.findById(telecallerId).populate("leads");
         if (!telecaller) {
             return res.status(404).json({ message: "Telecaller not found." });
         }
@@ -60,12 +58,11 @@ const getAssignedLeads = async (req, res) => {
     }
 };
 
-
 const getTelecallerHistory = async (req, res) => {
     try {
         const { telecallerId } = req.params;
 
-        const telecaller = await Telecaller.findById(telecallerId).populate("history.leadId");
+        const telecaller = await req.db.Telecaller.findById(telecallerId).populate("history.leadId");
         if (!telecaller) {
             return res.status(404).json({ message: "Telecaller not found." });
         }

@@ -1,16 +1,18 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
-const Admin = require('../schema/Adminschema');
+const Admin = require('../schema/Adminschema'); 
+
 const addadmin = async (req, res) => {
     try {
-        console.log(req.body)
+        console.log(req.body);
         const { email, password, username, superadminId } = req.body;
 
         if (!email || !password || !username || !superadminId) {
             return res.status(400).json({ message: "Please provide all required fields." });
         }
 
+        const Admin = req.db.model('Admin');
         const existingAdmin = await Admin.findOne({ email });
         if (existingAdmin) {
             return res.status(400).json({ message: "Admin with this email already exists." });
@@ -18,7 +20,7 @@ const addadmin = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const databaseName = `admin_${email.replace('@', '_').replace('.', '_')}`;
+        const databaseName = `admin_${username}_${email.replace('@', '_').replace('.', '_')}`;
 
         const newAdmin = new Admin({
             email,
@@ -26,7 +28,7 @@ const addadmin = async (req, res) => {
             username,
             superadmin: superadminId,
             status: "active",
-            databaseName 
+            databaseName
         });
 
         await newAdmin.save();
@@ -48,7 +50,7 @@ const updateadmin = async (req, res) => {
             return res.status(400).json({ message: "Please provide at least one field to update." });
         }
 
-        const admin = await Admin.findById(adminId);
+        const admin = await req.db.Admin.findById(adminId);
         if (!admin) {
             return res.status(404).json({ message: "Admin not found." });
         }
@@ -71,17 +73,16 @@ const updateadmin = async (req, res) => {
     }
 };
 
-
 const deleteadmin = async (req, res) => {
     try {
         const { adminId } = req.params;
 
-        const admin = await Admin.findById(adminId);
+        const admin = await req.db.Admin.findById(adminId);
         if (!admin) {
             return res.status(404).json({ message: "Admin not found." });
         }
 
-        await Admin.findByIdAndDelete(adminId);
+        await req.db.Admin.findByIdAndDelete(adminId);
         res.status(200).json({ message: "Admin deleted successfully." });
     } catch (err) {
         console.error(err);
@@ -89,12 +90,11 @@ const deleteadmin = async (req, res) => {
     }
 };
 
-
 const pauseadmin = async (req, res) => {
     try {
         const { adminId } = req.params;
 
-        const admin = await Admin.findById(adminId);
+        const admin = await req.db.Admin.findById(adminId);
         if (!admin) {
             return res.status(404).json({ message: "Admin not found." });
         }

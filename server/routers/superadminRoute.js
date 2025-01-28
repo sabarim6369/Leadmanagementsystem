@@ -1,19 +1,16 @@
 const express = require("express");
 const {
-    addadmin,
-    updateadmin,
-    deleteadmin,
-    pauseadmin,
+  addadmin,
+  updateadmin,
+  deleteadmin,
+  pauseadmin,
 } = require("../controller/superadmin");
 
 const router = express.Router();
 
-router.post("/add", addadmin);
-
-router.patch("/update/:adminId", updateadmin);
-
-router.delete("/delete/:adminId", deleteadmin);
-
-router.patch("/pause/:adminId", pauseadmin);
+router.post("/add", (req, res) => addadmin(req, res, req.db));
+router.patch("/update/:adminId", (req, res) => updateadmin(req, res, req.db));
+router.delete("/delete/:adminId", (req, res) => deleteadmin(req, res, req.db));
+router.patch("/pause/:adminId", (req, res) => pauseadmin(req, res, req.db));
 
 module.exports = router;

@@ -64,5 +64,4 @@ const telecallerschema = new mongoose.Schema({
     ]
 });
 
-const Telecaller = mongoose.model("Telecaller", telecallerschema);
-module.exports = Telecaller;
+module.exports = telecallerschema;

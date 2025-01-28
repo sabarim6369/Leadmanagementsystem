@@ -29,5 +29,4 @@ const leadschema=new mongoose.Schema({
         default: Date.now
     },
 })
-const Lead = mongoose.model("Lead", leadschema);
-module.exports = Lead;
+module.exports = leadschema;

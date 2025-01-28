@@ -24,5 +24,4 @@ type:String
         enum:["active","inactive","paused"]
     }
 })
-const authentication=mongoose.model("Admin",Adminschema)
-module.exports=authentication
+module.exports=Adminschema
