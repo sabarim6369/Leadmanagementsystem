@@ -5,24 +5,26 @@ import Addpopup from '../Dashboard/popups/addpopup'
 import { useState, useEffect } from 'react'
 import decodeToken from '../../../utils/jwtdecode'
 import axios from 'axios'
+import HashLoader from "react-spinners/HashLoader";
 
 const Telecallers = () => {
   const [opentools, setopentools] = useState(false);
   const [popup, setispopupopen] = useState(false);
+  const[loading1,setloading1]=useState(false);
   const [telecallerdata, settelecallerdata] = useState([]);
   const [selectedtelecaller, setselectedtelecaller] = useState(null);
   const options = ["Option 1", "Option 2", "Option 3"];
 
   useEffect(() => {
     const fetchalltelecallers = async () => {
+      setloading1(true);
       const token = localStorage.getItem("token");
-
       const tokenvalidation = decodeToken(token);
       const adminId = tokenvalidation.adminId;
       const databaseName = tokenvalidation.databaseName;
-
       const response = await axios.get("http://localhost:8000/api/admin/getalltelecaller", { headers: { "database": databaseName } })
       console.log(response.data.alltelecallers)
+      setloading1(false);
       settelecallerdata(response.data.alltelecallers)
     }
     fetchalltelecallers()
@@ -52,7 +54,19 @@ const Telecallers = () => {
   const closeModal = () => {
     setselectedtelecaller(null);
   };
-
+  if (loading1) {
+    return (
+      <div className="flex h-screen bg-gray-900">
+        <div className="lg:w-[250px] w-0">
+          <Sidebar />
+        </div>
+        <div className="flex-grow flex justify-center items-center">
+          <HashLoader color="#36d7b7" size={100} />
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="flex h-screen bg-gray-900">
       <div className="lg:w-[250px] w-0">
