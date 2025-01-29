@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import decodeToken from "../../../utils/jwtdecode";
-export default function LoginPage() {
+export default function LoginPage({ setUserRole }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const[role,setRole]=useState("");
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -25,21 +26,44 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const token=localStorage.getItem("token");
-      console.log(token);
-   
-      const response = await axios.post("http://localhost:8000/api/admin/login", {
-        email,
-        password,
-      }, {
-        headers: {
-          'database': "superadmin" 
-    }});
+      const token = localStorage.getItem("token");
+      console.log(role);
+      let database = "";
+
+      if (role === "superadmin") {
+        database = "superadmin";
+      } else if (role === "admin") {
+        database = "superadmin"; 
+      } else if (role === "telecaller") {
+        database = "superadmin";
+      }
+
+      let response;
+      if (role === "telecaller") {
+        response = await axios.post(
+          "http://localhost:8000/api/telecaller/login", 
+          { email, password, role },
+          {
+            headers: { database: database }, 
+          }
+        );
+      } else if (role === "admin" || role === "superadmin") {
+        response = await axios.post(
+          "http://localhost:8000/api/admin/login", 
+          { email, password, role },
+          {
+            headers: { database: database }, 
+          }
+        );
+      }
+
+      console.log(response);
 
       if (response.status === 200) {
-        console.log(response.data.token)
+        console.log(response.data.token);
         toast.success("Login successful!");
-        localStorage.setItem("token",response.data.token)
+        localStorage.setItem("token", response.data.token);
+      setUserRole(role)
         setTimeout(() => {
           navigate("/dashboard");
         }, 2000);
@@ -58,7 +82,8 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900">
@@ -90,6 +115,22 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             />
+          </div>
+          <div>
+            <label htmlFor="role" className="block text-gray-700 text-sm font-medium mb-2">
+              Role
+            </label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            >
+              <option value="">select type of user</option>
+              <option value="superadmin">Superadmin</option>
+              <option value="admin">Admin</option>
+              <option value="telecaller">Telecaller</option>
+            </select>
           </div>
           <div className="flex items-center justify-between">
             <label className="flex items-center text-sm text-gray-600">

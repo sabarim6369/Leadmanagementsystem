@@ -1,9 +1,20 @@
 import React, { useState,useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-
+import { jwtDecode } from 'jwt-decode';
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const[role,setrole]=useState(null)
+    const [isLoading, setIsLoading] = useState(true);
 
+useEffect(()=>{
+    const getrole=()=>{
+        const token=localStorage.getItem("token");
+        const decodeToken=jwtDecode(token);
+        setrole(decodeToken.role);
+        setIsLoading(false)
+    }
+    getrole()
+},[])
     const togglesidebar = () => {
         setIsOpen(!isOpen);
     };
@@ -16,6 +27,7 @@ const Sidebar = () => {
         if(path==="/messages") return 4;
         if(path==="/settings") return 5;
         if(path==="/history") return 6;
+        if(path==="/leads") return 8
     })
     const navigate = useNavigate();
 
@@ -50,11 +62,16 @@ const Sidebar = () => {
           case 6:
             if (currentPath !== "/history") navigate("/history");
             break;
+          case 8:
+            if(currentPath!=='/leads') navigate("/leads");
+            break;
           default:
             break;
         }
       }, [select, navigate]);
-    
+      if (isLoading) {
+        return null;
+    }
     return (
         <>
             <div className="relative h-screen m-0 p-0">
@@ -76,13 +93,17 @@ const Sidebar = () => {
                             <i className={`fas fa-cogs fa-2x mr-4 text-grey group-hover:text-blue-500 ${select===0?'text-black':'text-grey'}`}></i>
                             <h2 className={`text-white text-2xl  ${select===0?'font-bold text-black':'text-white'}`}>Dashboard</h2>
                         </div>
-                        <div onClick={()=>setselect(1)} className={`flex items-center cursor-pointer ${select===1?'bg-mint-green p-3 rounded':'text-white'}`}>
+                  <div onClick={()=>setselect(1)} className={`flex items-center cursor-pointer ${select===1?'bg-mint-green p-3 rounded':'text-white'}`}>
                             <i className={`fas fa-user fa-2x mr-4 text-gray-500 group-hover:text-blue-500 ${select===1?'text-black':'text-grey'}`}></i>
                             <h2 className={`text-white text-2xl  ${select===1?'font-bold text-black':'text-white'}`}>Profile</h2>
                         </div>
-                        <div onClick={()=>setselect(2)} className={`flex items-center cursor-pointer ${select===2?'bg-mint-green p-3 rounded':'text-white'}`}>
+                      {role!=="telecaller" &&  <div onClick={()=>setselect(2)} className={`flex items-center cursor-pointer ${select===2?'bg-mint-green p-3 rounded':'text-white'}`}>
                             <i className={`fas fa-phone fa-2x mr-4 text-gray-500 group-hover:text-blue-500 ${select===2?'text-black':'text-grey'}`}></i>
                             <h2 className={`text-white text-2xl  ${select===2?'font-bold text-black':'text-white'}`}>Telecallers</h2>
+                        </div>}
+                        <div onClick={()=>setselect(8)} className={`flex items-center cursor-pointer ${select===8?'bg-mint-green p-3 rounded':'text-white'}`}>
+                            <i className={`fas fa-user fa-2x mr-4 text-gray-500 group-hover:text-blue-500 ${select===8?'text-black':'text-grey'}`}></i>
+                            <h2 className={`text-white text-2xl  ${select===8?'font-bold text-black':'text-white'}`}>Leads</h2>
                         </div>
                         <div onClick={()=>setselect(3)} className={`flex items-center cursor-pointer ${select===3?'bg-mint-green p-3 rounded':'text-white'}`}>
                             <i className={`fas fa-chart-line fa-2x mr-4 text-gray-500 group-hover:text-blue-500 ${select===3?'text-black':'text-grey'}`}></i>

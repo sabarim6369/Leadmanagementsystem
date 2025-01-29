@@ -32,7 +32,6 @@ app.use((req, res, next) => {
   }
 });
 
-// Routes
 app.use('/api/superadmin', superadminrouter);
 app.use('/api/admin', adminrouter);
 app.use('/api/telecaller', telecallerroute);

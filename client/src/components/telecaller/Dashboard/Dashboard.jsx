@@ -7,10 +7,6 @@ import LeadStatus from './Leadstatus';
 import Callinsights from './Callinsights';
 const TelecallersDashboard = () => {
   
-
-  
-  
-
   return (
     <div className="flex h-screen bg-gray-900">
       <div className="lg:w-[250px] w-0">

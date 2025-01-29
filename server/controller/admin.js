@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const Admin = require('../schema/Adminschema');
 const mongoose = require('mongoose');
 const {getDatabaseConnection} = require('../config/db'); 
+const telecallerschema=require("../schema/telecallerschema");
 const login = async (req, res) => {
     const { email, password } = req.body;
 console.log(req.body)
@@ -31,7 +32,7 @@ console.log(req.body)
 
        console.log("dd",databaseName)
 
-        const token = jwt.sign({ adminId: admin._id, databaseName }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ adminId: admin._id, databaseName ,role:"admin"}, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.status(200).json({ message: "Login successful", token });
     } catch (err) {
@@ -49,13 +50,17 @@ return res.status(200).json({message:"telecallers fetched successfully",alltelec
 
 }
 
+
 const addtelecaller = async (req, res) => {
     try {
-        const { email, password, username, number,address, adminId } = req.body;  
+        const { email, password, username, number, address, adminId } = req.body;
+
         if (!email || !password || !username || !number || !adminId) {
             return res.status(401).json({ message: "Please provide all required fields." });
         }
-const Telecaller=req.db.model("Telecaller")
+
+        const Telecaller = req.db.model("Telecaller");
+
         const existingTelecaller = await Telecaller.findOne({ email });
         if (existingTelecaller) {
             return res.status(402).json({ message: "Telecaller with this email already exists." });
@@ -64,25 +69,41 @@ const Telecaller=req.db.model("Telecaller")
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newTelecaller = new Telecaller({
-            email,
-            password: hashedPassword,
-            username,
-            number,
-            address,
-            admin: adminId, 
-            leads: [],
-            history: []
+          email,
+          password: hashedPassword,
+          username,
+          number,
+          address,
+          admin: adminId,
+          leads: [],
+          history: [],
         });
 
-        await newTelecaller.save();
-       
+        await newTelecaller.save(); 
 
-        res.status(200).json({ message: "Telecaller added successfully", data: newTelecaller });
+     
+
+        const superAdminDbURI = `mongodb+srv://sabarim636901:Sabari.m6369@leadmanagementsystem.n3nx0.mongodb.net/superadmin`;
+        const superAdminConnection = mongoose.connect(superAdminDbURI).then("connected successfully to superadmin db").catch((err)=>{console.log("err",err)});
+
+        const AdminModel = mongoose.model("Admin", require("../schema/Adminschema"));
+
+        await AdminModel.findByIdAndUpdate(
+            adminId,
+            { $addToSet: { telecallers: { email } } }, 
+            { new: true }
+        );
+
+
+        res.status(200).json({ message: "Telecaller added successfully and mapped to admin", data: newTelecaller });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error adding telecaller", error: err });
     }
 };
+
+
 
 const updatetelecaller = async (req, res) => {
     try {

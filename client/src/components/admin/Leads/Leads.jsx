@@ -7,7 +7,7 @@ import decodeToken from '../../../utils/jwtdecode'
 import axios from 'axios'
 import HashLoader from "react-spinners/HashLoader";
 
-const Telecallers = () => {
+const Leads = () => {
   const [opentools, setopentools] = useState(false);
   const [popup, setispopupopen] = useState(false);
   const[loading1,setloading1]=useState(false);
@@ -76,12 +76,12 @@ const Telecallers = () => {
       </div>
       <div className="flex-grow p-4 md:p-6 overflow-auto">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl text-white">Telecallers</h1>
+          <h1 className="text-3xl text-white">Leads</h1>
           <button
             className="hidden sm:block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg ml-auto"
             onClick={() => setispopupopen(true)}
           >
-            Add Telecallers
+            Add Leads
           </button>
           <div
             className="lg:hidden text-white ml-auto mr-3 cursor-pointer"
@@ -212,4 +212,4 @@ const Telecallers = () => {
   );
 }
 
-export default Telecallers;
+export default Leads;

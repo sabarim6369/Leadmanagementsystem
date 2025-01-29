@@ -22,6 +22,8 @@ type:String
     status:{
         type:String,
         enum:["active","inactive","paused"]
-    }
+    },
+    telecallers: [{email: { type: String}
+    }] 
 })
-module.exports=Adminschema
+module.exports = Adminschema;
