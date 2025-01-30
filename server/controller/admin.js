@@ -49,6 +49,15 @@ if(!alltelecallers){
 return res.status(200).json({message:"telecallers fetched successfully",alltelecallers})
 
 }
+const getallleads=async(req,res)=>{
+    const leads = req.db.model("Lead");
+const allleads=await leads.find();
+if(!allleads){
+    return res.status(400).json({message:"leads list is empty."})
+}
+return res.status(200).json({message:"leads fetched successfully",allleads})
+
+}
 
 
 const addtelecaller = async (req, res) => {
@@ -138,7 +147,7 @@ const deletetelecaller = async (req, res) => {
         const { telecallerId } = req.params;
 
         const telecaller = await Telecaller.findById(telecallerId);
-        if (!telecaller) {
+        if (!telecaller) {  
             return res.status(404).json({ message: "Telecaller not found." });
         }
 
@@ -217,23 +226,33 @@ const swapleads = async (req, res) => {
 
 const addleads = async (req, res) => {
     try {
-        const leadsData = req.body;
+        console.log(req.body)
+        const leadsData = req.body.leadsData;
+        console.log(leadsData)
 
         if (!Array.isArray(leadsData) || leadsData.length === 0) {
+        // if(req.body){
+        
+        // }
             return res.status(400).json({ message: "No data provided or invalid format." });
         }
 
         const leads = leadsData.map((lead) => {
             return {
-                name: lead.name,
-                mobilenumber: lead.mobilenumber,
-                address: lead.address || "",
-                status: lead.status || "unassigned",
-                assignedTo: lead.assignedTo || [],
+                name: `${lead['First Name']} ${lead['Last Name']}`,
+                mobilenumber: lead.Id,
+                address: lead.Country || "",
+                gender: lead.Gender || "", 
+                country: lead.Country || "",
+                age: lead.Age || null,
+                date: lead.Date || "",
+                id: lead.Id || null,
             };
         });
+        console.log("fvfj")
 
-        const result = await Lead.insertMany(leads);
+        const Leads = req.db.model("Lead");
+        const result = await Leads.insertMany(leads);
         res.status(201).json({ message: "Leads uploaded successfully", data: result });
     } catch (err) {
         console.error(err);
@@ -249,5 +268,6 @@ module.exports = {
     swapleads,
     addleads,
     login,
-    getalltelecaller
+    getalltelecaller,
+    getallleads
 };

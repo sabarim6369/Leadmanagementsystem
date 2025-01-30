@@ -1,32 +1,45 @@
-const mongoose=require("mongoose");
-const leadschema=new mongoose.Schema({
-    name:{
-        type:String
+const mongoose = require("mongoose");
+
+const leadSchema = new mongoose.Schema({
+    name: {
+        type: String,
     },
-    admin: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin',  
-        required: true,
-      },
-    mobilenumber:{
-        type:Number
+    
+    mobilenumber: {
+        type: Number,
     },
-    address:{
-        type:String
+    address: {
+        type: String,
     },
-    status:{
-        type:String,
-        enum:["unassigned","warm","cold","hot","fulfilled"],
-        default: "unassigned"
+    status: {
+        type: String,
+        enum: ["unassigned", "warm", "cold", "hot", "fulfilled"],
+        default: "unassigned",
     },
     assignedTo: [{
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Telecaller",
-        default: null
+        default: null,
     }],
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     },
-})
-module.exports = leadschema;
+    gender: {
+        type: String,
+    },
+    country: {
+        type: String,
+    },
+    age: {
+        type: Number,
+    },
+    date: {
+        type: String,
+    },
+    id: {
+        type: Number,
+    },
+});
+
+module.exports = leadSchema;

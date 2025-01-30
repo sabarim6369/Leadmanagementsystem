@@ -4,7 +4,7 @@ const Toolmodal = ({opentools,add}) => {
     if (!opentools) return null;
   return (
     opentools && (
-      <div className="tools-modal absolute top-15 right-5 p-4 ml-auto w-[30%] bg-gray-800 rounded-lg z-1000 md:w-[10%] md:right-10">
+      <div className="tools-modal absolute top-[60px] right-5 p-4 ml-auto w-[30%] bg-gray-800 rounded-lg z-1000 md:w-[10%] md:right-10">
         <div
           className="flex items-center cursor-pointer"
           onClick={() => {

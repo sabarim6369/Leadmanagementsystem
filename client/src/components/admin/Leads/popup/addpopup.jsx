@@ -7,7 +7,7 @@ const Addpopup = ({ popup, setispopupopen, type,adminid }) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    password: "",
+
     number: "",
     address: "",
     adminId: adminid 
@@ -27,7 +27,7 @@ const Addpopup = ({ popup, setispopupopen, type,adminid }) => {
      const adminId=tokenvalidation.adminId;
      const databaseName=tokenvalidation.databaseName;
      console.log(adminId,databaseName)
-      const response = await axios.post("http://localhost:8000/api/admin/add", formData,{
+      const response = await axios.post("http://localhost:8000/api/admin/addleads",{ leadsData:[formData]},{
         headers:{
           "database":databaseName
         }
@@ -44,7 +44,6 @@ const Addpopup = ({ popup, setispopupopen, type,adminid }) => {
       setFormData({
         username: "",
         email: "",
-        password: "",
         number: "",
         address: "",
         adminId: "679877d4c689f160a3d6ca1e"
@@ -93,14 +92,7 @@ const Addpopup = ({ popup, setispopupopen, type,adminid }) => {
                 className="p-3 w-[90%] rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter Email"
               />
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="p-3 w-[90%] rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Create a Password"
-              />
+            
               <input
                 type="text"
                 name="number"

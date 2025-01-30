@@ -52,3 +52,4 @@ exports.getTelecallerModel = (db) => db.model('Telecaller', telecallerSchema);
 exports.getAdminModel = (db) => db.model('Admin', adminSchema);
 
 exports.getSuperadminModel = (db) => db.model('Superadmin', superadminSchema);
+exports.getleadModel=(db)=>db.model("Lead",leadSchema)
