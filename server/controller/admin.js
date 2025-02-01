@@ -51,7 +51,7 @@ return res.status(200).json({message:"telecallers fetched successfully",alltelec
 }
 const getallleads=async(req,res)=>{
     const leads = req.db.model("Lead");
-const allleads=await leads.find();
+const allleads=await leads.find().populate("assignedTo","username email number");
 if(!allleads){
     return res.status(400).json({message:"leads list is empty."})
 }
@@ -259,6 +259,126 @@ const addleads = async (req, res) => {
         res.status(500).json({ message: "Error uploading leads", error: err });
     }
 };
+const assignallleads = async (req, res) => {
+    console.log("Before fetching unassigned leads");
+
+    const Leads = req.db.model("Lead");
+    const Telecallers = req.db.model("Telecaller");
+
+    try {
+        const unassignedLeads = await Leads.find({ status: 'unassigned' });
+        console.log("Unassigned leads:", unassignedLeads.length);
+
+        if (unassignedLeads.length === 0) {
+            return res.status(400).json({ message: "No unassigned leads to assign." });
+        }
+
+        const telecallers = await Telecallers.find({ status: 'active' });
+        console.log("Active telecallers:", telecallers.length);
+
+        if (telecallers.length === 0) {
+            return res.status(400).json({ message: "No active telecallers available." });
+        }
+
+        telecallers.sort((a, b) => a.pending - b.pending || a.leads.length - b.leads.length);
+
+        const totalLeadsToAssign = unassignedLeads.length;
+        let leadIndex = 0;
+
+        const baseTarget = Math.floor(totalLeadsToAssign / telecallers.length); 
+        let remainder = totalLeadsToAssign % telecallers.length; 
+
+        for (let i = 0; i < telecallers.length; i++) {
+            const telecaller = telecallers[i];
+            let target = baseTarget;
+
+            if (telecaller.pending > 0) {
+                target = Math.max(target - 1, 0); 
+            }
+
+            if (remainder > 0) {
+                target++;
+                remainder--; 
+            }
+
+            if (target <= 0) {
+                console.log(`Telecaller ${telecaller.username} has enough leads already, skipping.`);
+                continue;
+            }
+
+            const assignedLeads = unassignedLeads.slice(leadIndex, leadIndex + target);
+            leadIndex += target;
+
+            if (assignedLeads.length > 0) {
+                const leadIds = assignedLeads.map(lead => lead._id);
+
+                await Leads.updateMany(
+                    { _id: { $in: leadIds } },
+                    {
+                        $push: { assignedTo: telecaller._id },
+                        $set: { status: 'assigned' }
+                    }
+                );
+
+                await Telecallers.updateOne(
+                    { _id: telecaller._id },
+                    { 
+                        $push: { leads: { $each: leadIds } },
+                        $inc: { pending: target } 
+                    }
+                );
+            }
+
+            if (leadIndex >= totalLeadsToAssign) break;
+        }
+
+        if (leadIndex < totalLeadsToAssign) {
+            console.log("Some leads are still unassigned, reassigning remaining leads.");
+
+            const remainingLeads = unassignedLeads.slice(leadIndex);
+            const remainingTelecallers = telecallers.filter(tc => tc.pending <= 0); // Only give to telecallers with no pending leads
+
+            if (remainingTelecallers.length === 0) {
+                remainingTelecallers.push(...telecallers);
+            }
+
+            let remainingIndex = 0;
+            for (let i = 0; i < remainingLeads.length; i++) {
+                const lead = remainingLeads[i];
+                const telecaller = remainingTelecallers[remainingIndex];
+
+                await Leads.updateOne(
+                    { _id: lead._id },
+                    {
+                        $push: { assignedTo: telecaller._id },
+                        $set: { status: 'cold' }
+                    }
+                );
+                
+                await Telecallers.updateOne(
+                    { _id: telecaller._id },
+                    { 
+                        $push: { leads: lead._id },
+                        $inc: { pending: 1 }
+                    }
+                );
+                
+
+                remainingIndex = (remainingIndex + 1) % remainingTelecallers.length; // Cycle through available telecallers
+            }
+        }
+
+        res.status(200).json({ message: "Leads assigned successfully." });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ message: "Failed to assign leads.", error: error.message });
+    }
+};
+
+
+
+
+module.exports = assignallleads;
 
 module.exports = {
     addtelecaller,
@@ -269,5 +389,6 @@ module.exports = {
     addleads,
     login,
     getalltelecaller,
-    getallleads
+    getallleads,
+    assignallleads
 };

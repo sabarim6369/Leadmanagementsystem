@@ -42,6 +42,10 @@ const telecallerschema = new mongoose.Schema({
             ref: "Lead"
         }
     ],
+    pending: {   
+        type: Number,
+        default: 0
+    },
     history: [
         {
             leadId: {

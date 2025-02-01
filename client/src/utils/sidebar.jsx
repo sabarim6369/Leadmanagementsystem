@@ -5,16 +5,28 @@ const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const[role,setrole]=useState(null)
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
-useEffect(()=>{
-    const getrole=()=>{
-        const token=localStorage.getItem("token");
-        const decodeToken=jwtDecode(token);
-        setrole(decodeToken.role);
-        setIsLoading(false)
-    }
-    getrole()
-},[])
+    useEffect(() => {
+        const getRole = () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                navigate("/login"); // Redirect if no token
+                return;
+            }
+            try {
+                const decodedToken = jwtDecode(token);
+                setrole(decodedToken.role);
+            } catch (error) {
+                console.error("Invalid token:", error);
+                localStorage.removeItem("token");
+                navigate("/login"); // Redirect if token is invalid
+            }
+            setIsLoading(false);
+        };
+        getRole();
+    }, [navigate]);
+
     const togglesidebar = () => {
         setIsOpen(!isOpen);
     };
@@ -29,7 +41,6 @@ useEffect(()=>{
         if(path==="/history") return 6;
         if(path==="/leads") return 8
     })
-    const navigate = useNavigate();
 
     const signout=()=>{
         console.log("fsv")

@@ -68,6 +68,21 @@ import "react-toastify/dist/ReactToastify.css";
       setopentools(false);
       setImportPopup(true);
     };
+    const openassignleads = async () => {
+      try {
+          const response = await axios.put(
+              "http://localhost:8000/api/admin/assignallleads", 
+              {}, 
+              { headers: { "database": databasename } }
+          );
+  
+          toast.success(response.data.message || "Leads assigned successfully.");
+          console.log(response);
+      } catch (error) {
+          toast.error(error.response?.data?.message || "Failed to assign leads.");
+          console.error("Error:", error);
+      }
+  };
     const closeImportPopup = () => {
       setImportPopup(false);
     };
@@ -149,6 +164,7 @@ import "react-toastify/dist/ReactToastify.css";
                 opentools={opentools}
                 add={add}
                 openImportPopup={openImportPopup}
+                openassignleads={openassignleads}
               />
             </div>
           </div>
@@ -189,7 +205,7 @@ import "react-toastify/dist/ReactToastify.css";
                     {telecaller.username}
                   </h2>
                   <div className="px-2 py-1 bg-green-500 text-sm text-white rounded-lg">
-                    {telecaller.status === "active" ? "Active" : "Inactive"}
+                    {telecaller.status}
                   </div>
                 </div>
 
@@ -208,7 +224,7 @@ import "react-toastify/dist/ReactToastify.css";
                   </div>
                   <div className="flex items-center text-gray-300">
                     <i className="fa fa-envelope text-blue-400 text-lg mr-2"></i>
-                    <p>{telecaller.email}</p>
+                    <p>{telecaller.assignedTo?.email}</p>
                   </div>
                 </div>
 

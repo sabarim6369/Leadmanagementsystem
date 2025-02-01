@@ -1,6 +1,6 @@
 import React from "react";
 
-const Toolmodal = ({ opentools, add, openImportPopup }) => {
+const Toolmodal = ({ opentools, add, openImportPopup,openassignleads }) => {
   if (!opentools) return null;
 
   return (
@@ -13,6 +13,10 @@ const Toolmodal = ({ opentools, add, openImportPopup }) => {
       <div className="flex items-center cursor-pointer mt-4" onClick={openImportPopup}>
         <i className="fa fa-upload text-white"></i>
         <h3 className="text-white ml-3 text-wrap">Import Leads</h3>
+      </div>
+      <div className="flex items-center cursor-pointer mt-4" onClick={openassignleads}>
+        <i className="fa fa-add text-white"></i>
+        <h3 className="text-white ml-3 text-wrap">Assign Leads</h3>
       </div>
     </div>
   );
