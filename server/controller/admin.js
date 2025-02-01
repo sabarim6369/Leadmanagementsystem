@@ -40,15 +40,26 @@ console.log(req.body)
         res.status(500).json({ message: "Error logging in", error: err });
     }
 };
-const getalltelecaller=async(req,res)=>{
-    const Telecaller = req.db.model("Telecaller");
-const alltelecallers=await Telecaller.find();
-if(!alltelecallers){
-    return res.status(400).json({message:"telecaller list is empty."})
-}
-return res.status(200).json({message:"telecallers fetched successfully",alltelecallers})
+const getalltelecaller = async (req, res) => {
+    try {
+        const Telecaller = req.db.model("Telecaller");
+        const alltelecallers = await Telecaller.find({ status: "active" });
 
-}
+        if (alltelecallers.length === 0) {
+            return res.status(400).json({ message: "Telecaller list is empty." });
+        }
+
+        return res.status(200).json({ 
+            message: "Telecallers fetched successfully", 
+            alltelecallers 
+        });
+
+    } catch (error) {
+        console.error("Error fetching telecallers:", error);
+        return res.status(500).json({ message: "Failed to fetch telecallers.", error: error.message });
+    }
+};
+
 const getallleads=async(req,res)=>{
     const leads = req.db.model("Lead");
 const allleads=await leads.find().populate("assignedTo","username email number");
@@ -158,38 +169,58 @@ const deletetelecaller = async (req, res) => {
         res.status(500).json({ message: "Error deleting telecaller", error: err });
     }
 };
-
 const assignleads = async (req, res) => {
     try {
-        const { telecallerId, leadIds } = req.body;  
-        if (!telecallerId || !Array.isArray(leadIds) || leadIds.length === 0) {
-            return res.status(400).json({ message: "Please provide telecaller ID and lead IDs." });
+        const { telecallerId, leadId } = req.body; 
+        console.log("Assigning single lead:", req.body);
+
+        if (!telecallerId || !leadId) {
+
+            return res.status(400).json({ message: "Please provide telecaller ID and lead ID." });
         }
+
+        const Telecaller = req.db.model("Telecaller");
+        const Lead = req.db.model("Lead");
 
         const telecaller = await Telecaller.findById(telecallerId);
         if (!telecaller) {
             return res.status(404).json({ message: "Telecaller not found." });
         }
 
-        const leads = await Lead.find({ '_id': { $in: leadIds } });
-        if (leads.length !== leadIds.length) {
-            return res.status(404).json({ message: "Some leads not found." });
+        const lead = await Lead.findById(leadId);
+        if (!lead) {
+            return res.status(404).json({ message: "Lead not found." });
+        }
+        if (lead.status !== "unassigned") {
+            const populatedLead = await Lead.findById(leadId).populate("assignedTo", "username");
+        
+            const assignedTelecallers = populatedLead.assignedTo.map(tc => tc.username).join(", ");
+        
+            console.log(assignedTelecallers);
+            return res.status(400).json({ message: `Lead is already assigned to: ${assignedTelecallers}` });
+        }
+        
+        if (lead.assignedTo.includes(telecaller._id)) {
+            console.log("dddddddddddddddddd")
+
+            return res.status(400).json({ message: "Lead is already assigned to this telecaller." });
         }
 
-        telecaller.leads.push(...leads.map(lead => lead._id));
+        telecaller.leads.push(lead._id);
+        telecaller.pending += 1; 
         await telecaller.save();
 
-        for (const lead of leads) {
-            lead.assignedTo.push(telecaller._id);
-            await lead.save();
-        }
+        lead.assignedTo.push(telecaller._id);
+        lead.status = "assigned"; 
+        await lead.save();
 
-        res.status(200).json({ message: "Leads assigned successfully." });
+        res.status(200).json({ message: "Lead assigned successfully." });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Error assigning leads", error: err });
+        console.error("Error assigning lead:", err);
+        res.status(500).json({ message: "Error assigning lead", error: err.message });
     }
 };
+
 
 const swapleads = async (req, res) => {
     try {
