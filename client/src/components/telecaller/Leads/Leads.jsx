@@ -10,10 +10,12 @@ import ImportPopup from './popup/importpopup';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Viewmore from './popup/viewmore';
-import Assignlead from './popup/assignlead';
+import Notes from './popup/Notes';
 import Leadscard from './leadcards/leads'
 import Searchbar from './headersection/searchbar';
-const Leads = () => {
+import { jwtDecode } from "jwt-decode";
+
+const TelecallersLeads = () => {
   const [opentools, setopentools] = useState(false);
   const [popup, setispopupopen] = useState(false);
   const [loading1, setloading1] = useState(false);
@@ -30,18 +32,21 @@ const Leads = () => {
   const [leadassignpopup, setleadassignpopup] = useState(false);
   const [telecallers, setTelecallers] = useState([]);
   const [leads, setLeads] = useState([]);
-
+const[telecallerid,settelecallerid]=useState("");
   const fetchLeads = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const tokenvalidation = decodeToken(token);
+      const tokenvalidation = jwtDecode(token);
+      console.log(tokenvalidation)
       const databaseName = tokenvalidation.databaseName;
-      
-      const response = await axios.get("http://localhost:8000/api/admin/getallleads", {
+      const userid=tokenvalidation.telecallerId;
+      settelecallerid(userid);
+      const response = await axios.get(`http://localhost:8000/api/telecaller/leads/${userid}`, {
         headers: { "database": databaseName }
       });
-      console.log(response.data)
-      settelecallerdata(response.data.allleads);
+      
+      console.log(response)
+      settelecallerdata(response.data.leads);
       return response.data.allleads;
     } catch (error) {
       console.error("Error fetching leads:", error);
@@ -80,7 +85,7 @@ const Leads = () => {
           settelecallerdata(newLeads);
         }
       }
-    }, 5000);
+    }, 60000);
 
     return () => clearInterval(pollInterval);
   }, [fetchLeads, telecallerdata]);
@@ -125,21 +130,12 @@ const Leads = () => {
       }
     }
   };
-
-  const Assignleads = async (telecallerid) => {
-    setleadassignpopup(true);
-    setselectedtleadforassignment(telecallerid);
-    try {
-      const response = await axios.get(
-        "http://localhost:8000/api/admin/getalltelecaller",
-        { headers: { "database": databasename } }
-      );
-      setavailabletelecallers(response.data.alltelecallers);
-    } catch (error) {
-      toast.error("Failed to fetch telecallers");
-      console.error(error);
-    }
-  };
+  const[leadfornotes,setleadfornotes]=useState()
+  const[opennotespopup,setopennotespopup]=useState(false);
+const opennotes=(lead)=>{
+  setleadfornotes(lead);
+  setopennotespopup(true);
+}
 
   const closeModal = () => {
     setselectedtelecaller(null);
@@ -249,7 +245,7 @@ const Leads = () => {
           <Leadscard
             telecallerdata={telecallerdata}
             viewmore={viewmore}
-            Assignleads={Assignleads}
+            opennotes={opennotes}
           />
         </div>
 
@@ -259,11 +255,12 @@ const Leads = () => {
             closeModal={closeModal}
           />
         )}
-        {leadassignpopup && (
-          <Assignlead
-            setleadassignpopup={setleadassignpopup}
-            availableTelecallers={availabletelecallers}
-            assignLeadWithTelecaller={assignleadwithtelecaller}
+        {opennotespopup && (
+          <Notes
+            setopennotespopup={setopennotespopup}
+            leadfornotes={leadfornotes}
+            databasename={databasename}
+            telecallerid={telecallerid}
           />
         )}
 
@@ -285,4 +282,4 @@ const Leads = () => {
   );
 };
 
-export default Leads;
+export default TelecallersLeads;

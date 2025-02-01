@@ -1,45 +1,62 @@
 const mongoose = require("mongoose");
 
 const leadSchema = new mongoose.Schema({
-    name: {
+  name: {
+    type: String,
+  },
+
+  mobilenumber: {
+    type: Number,
+  },
+  address: {
+    type: String,
+  },
+  status: {
+    type: String,
+    enum: ["unassigned", "assigned", "warm", "cold", "hot", "fulfilled"],
+    default: "unassigned",
+  },
+  assignedTo: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Telecaller",
+      default: null,
+    },
+  ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  gender: {
+    type: String,
+  },
+  country: {
+    type: String,
+  },
+  age: {
+    type: Number,
+  },
+  date: {
+    type: String,
+  },
+  id: {
+    type: Number,
+  },
+  notes: [
+    {
+      note: {
         type: String,
-    },
-    
-    mobilenumber: {
-        type: Number,
-    },
-    address: {
-        type: String,
-    },
-    status: {
-        type: String,
-        enum: ["unassigned", "assigned","warm", "cold", "hot", "fulfilled"],
-        default: "unassigned",
-    },
-    assignedTo: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Telecaller",
-        default: null,
-    }],
-    createdAt: {
+      },
+      timestamp: {
         type: Date,
         default: Date.now,
+      },
+      telecallerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Telecaller",
+      },
     },
-    gender: {
-        type: String,
-    },
-    country: {
-        type: String,
-    },
-    age: {
-        type: Number,
-    },
-    date: {
-        type: String,
-    },
-    id: {
-        type: Number,
-    },
+  ],
 });
 
 module.exports = leadSchema;

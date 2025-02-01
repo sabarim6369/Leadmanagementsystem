@@ -14,24 +14,42 @@ const Telecallers = () => {
   const [adminid, setadminid] = useState("");
   const [telecallerdata, settelecallerdata] = useState([]);
   const [selectedtelecaller, setselectedtelecaller] = useState(null);
+  const[leads,setassignedleads]=useState([]);
+  const [assignedleadmodel,setassignedleadmodel]=useState(false)
   const options = ["Option 1", "Option 2", "Option 3"];
 
   useEffect(() => {
     const fetchalltelecallers = async () => {
-      setloading1(true);
-      const token = localStorage.getItem("token");
-      const tokenvalidation = decodeToken(token);
-      const adminId = tokenvalidation.adminId;
-      setadminid(adminId)
-      const databaseName = tokenvalidation.databaseName;
-      const response = await axios.get("http://localhost:8000/api/admin/getalltelecaller", { headers: { "database": databaseName } })
-      console.log(response.data.alltelecallers)
-      setloading1(false);
-      settelecallerdata(response.data.alltelecallers)
-    }
-    fetchalltelecallers()
-  }, [])
-
+      try {
+        setloading1(true);
+        const token = localStorage.getItem("token");
+        const tokenvalidation = decodeToken(token);
+        const adminId = tokenvalidation.adminId;
+        setadminid(adminId);
+        const databaseName = tokenvalidation.databaseName;
+  
+        const response = await axios.get(
+          "http://localhost:8000/api/admin/getalltelecaller",
+          { headers: { database: databaseName } }
+        );
+  
+        setloading1(false);
+        
+        if (response.status === 200 && response.data.alltelecallers) {
+          settelecallerdata(response.data.alltelecallers);
+        } else {
+          settelecallerdata([]); // If response is not as expected, set empty
+        }
+      } catch (error) {
+        setloading1(false);
+        console.error("Error fetching telecallers:", error);
+        settelecallerdata([]); // Set empty on error
+      }
+    };
+  
+    fetchalltelecallers();
+  }, []);
+  
   const openmodel = () => {
     setopentools(!opentools);
   };
@@ -52,6 +70,10 @@ const Telecallers = () => {
   const viewmore = (telecaller) => {
     setselectedtelecaller(telecaller);
   };
+  const assignedleads=(telecaller)=>{
+    setassignedleadmodel(true);
+    setassignedleads(telecaller.leads);
+  }
 
   const closeModal = () => {
     setselectedtelecaller(null);
@@ -120,7 +142,8 @@ const Telecallers = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {telecallerdata.map((telecaller, index) => (
+        {telecallerdata.length > 0 ? (
+          telecallerdata.map((telecaller, index) => (
             <div
               key={index}
               className="bg-gray-800 rounded-2xl shadow-lg p-4 flex flex-col"
@@ -152,54 +175,109 @@ const Telecallers = () => {
                   <p>{telecaller.email}</p>
                 </div>
               </div>
-
-              <button
-                className="mt-auto py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300"
-                onClick={() => {
-                  viewmore(telecaller);
-                }}
-              >
-                View More
-              </button>
+              <div className="flex justify-between">
+                <button
+                  className="mt-auto py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300 p-3"
+                  onClick={() => {
+                    viewmore(telecaller);
+                  }}
+                >
+                  View More
+                </button>
+                <button
+                  className="mt-auto py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300 p-2"
+                  onClick={() => {
+                    assignedleads(telecaller);
+                  }}
+                >
+                  Assigned Leads
+                </button>
+              </div>
             </div>
-          ))}
+          ))
+        ):(
+          <div className="col-span-1 sm:col-span-2 lg:col-span-4 text-center text-white text-xl p-6">
+      No telecallers available.
+    </div>
+        )
+        
+        
+        }
         </div>
 
         {selectedtelecaller && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-8 rounded-2xl w-[60%] max-w-3xl shadow-lg">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-        {selectedtelecaller.username}
-      </h2>
-      <div className="space-y-4">
-        <p className="text-lg text-gray-600">
-          <strong>Email:</strong> {selectedtelecaller.email}
-        </p>
-        <p className="text-lg text-gray-600">
-          <strong>Phone:</strong> +{selectedtelecaller.number}
-        </p>
-        <p className="text-lg text-gray-600">
-          <strong>Address:</strong> {selectedtelecaller.address || "No address available"}
-        </p>
-        <p className="text-lg text-gray-600">
-          <strong>Status:</strong> {selectedtelecaller.status}
-        </p>
-        <p className="text-lg text-gray-600">
-          <strong>Role:</strong> {selectedtelecaller.role}
-        </p>
-      </div>
-      <div className="flex justify-end mt-6">
-        <button
-          onClick={closeModal}
-          className="py-2 px-6 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-300"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white p-8 rounded-2xl w-[60%] max-w-3xl shadow-lg">
+              <h2 className="text-3xl font-semibold text-gray-800 mb-4">
+                {selectedtelecaller.username}
+              </h2>
+              <div className="space-y-4">
+                <p className="text-lg text-gray-600">
+                  <strong>Email:</strong> {selectedtelecaller.email}
+                </p>
+                <p className="text-lg text-gray-600">
+                  <strong>Phone:</strong> +{selectedtelecaller.number}
+                </p>
+                <p className="text-lg text-gray-600">
+                  <strong>Address:</strong>{" "}
+                  {selectedtelecaller.address || "No address available"}
+                </p>
+                <p className="text-lg text-gray-600">
+                  <strong>Status:</strong> {selectedtelecaller.status}
+                </p>
+                <p className="text-lg text-gray-600">
+                  <strong>Role:</strong> {selectedtelecaller.role}
+                </p>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={closeModal}
+                  className="py-2 px-6 bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {assignedleadmodel && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-8 rounded-2xl w-[60%] max-w-3xl shadow-lg h-[60%] overflow-y-auto relative scrollbar-none">
+              <div className="absolute top-4 right-4 cursor-pointer text-gray-600 hover:text-black">
+                <i
+                  className="fa fa-close text-2xl"
+                  onClick={() => setassignedleadmodel(false)}
+                ></i>
+              </div>
 
+              <div className="text-2xl text-center font-bold mb-4">
+                Leads Assigned
+              </div>
+
+              <ul className="space-y-3">
+                {leads.length > 0 ? (
+                  leads.map((lead, index) => (
+                    <li key={index} className="p-3 bg-gray-100 rounded-lg">
+                      <p className="text-lg">
+                        <strong>Name:</strong> {lead.name}
+                      </p>
+                      <p className="text-lg">
+                        <strong>Mobile:</strong> {lead.mobilenumber}
+                      </p>
+                      <p className="text-lg">
+                        <strong>Status:</strong> {lead.status}
+                      </p>
+                    </li>
+                  ))
+                ) : (
+                  <li className="p-3 bg-gray-100 rounded-lg">
+                    <p className="text-lg text-center">No leads Assigned</p>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        )}
 
         <Addpopup
           popup={popup}

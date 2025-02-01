@@ -10,6 +10,7 @@ import Telecallers from './components/admin/Telecallers/Telecallers';
 import LoginPage from './components/admin/Login/Login';
 import ProtectedRoute from './utils/Protectedroute';
 import Leads from "./components/admin/Leads/Leads" 
+import TelecallersLeads from './components/telecaller/Leads/Leads';
 import { jwtDecode } from 'jwt-decode'; 
 
 const App = () => {
@@ -67,7 +68,7 @@ const App = () => {
         />
         <Route 
           path="/leads" 
-          element={<ProtectedRoute element={<Leads />} allowedRoles={["admin","telecaller"]} />} 
+          element={<ProtectedRoute element={userRole==="admin"?<Leads />:<TelecallersLeads/>} allowedRoles={["admin","telecaller"]} />} 
         />
       </Routes>
     </BrowserRouter>

@@ -43,7 +43,12 @@ console.log(req.body)
 const getalltelecaller = async (req, res) => {
     try {
         const Telecaller = req.db.model("Telecaller");
-        const alltelecallers = await Telecaller.find({ status: "active" });
+
+        const alltelecallers = await Telecaller.find({ status: "active" })
+            .populate({
+                path: "leads", 
+                select: "name mobilenumber status",
+            });
 
         if (alltelecallers.length === 0) {
             return res.status(400).json({ message: "Telecaller list is empty." });
@@ -59,6 +64,7 @@ const getalltelecaller = async (req, res) => {
         return res.status(500).json({ message: "Failed to fetch telecallers.", error: error.message });
     }
 };
+
 
 const getallleads=async(req,res)=>{
     const leads = req.db.model("Lead");
@@ -103,7 +109,7 @@ const addtelecaller = async (req, res) => {
 
      
 
-        const superAdminDbURI = `mongodb+srv://sabarim636901:Sabari.m6369@leadmanagementsystem.n3nx0.mongodb.net/superadmin`;
+        const superAdminDbURI = process.env.MONGODB_SUPERADMINURI;
         const superAdminConnection = mongoose.connect(superAdminDbURI).then("connected successfully to superadmin db").catch((err)=>{console.log("err",err)});
 
         const AdminModel = mongoose.model("Admin", require("../schema/Adminschema"));
@@ -382,7 +388,7 @@ const assignallleads = async (req, res) => {
                     { _id: lead._id },
                     {
                         $push: { assignedTo: telecaller._id },
-                        $set: { status: 'cold' }
+                        $set: { status: 'assigned' }
                     }
                 );
                 

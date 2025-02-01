@@ -48,12 +48,20 @@ const updateLeadResult = async (req, res) => {
 const getAssignedLeads = async (req, res) => {
     try {
         const { telecallerId } = req.params;
+const Telecaller = req.db.model("Telecaller");
+const telecaller = await Telecaller.findById(telecallerId).populate({
+    path: "leads",
+    select: "name mobilenumber status notes",
+    populate: {
+        path: "notes.telecallerId",
+        model: "Telecaller",  // Ensure this matches your model name
+        select: "username",        // Get only the name of the telecaller
+    },
+});
 
-        const telecaller = await req.db.Telecaller.findById(telecallerId).populate("leads");
         if (!telecaller) {
             return res.status(404).json({ message: "Telecaller not found." });
         }
-
         res.status(200).json({ leads: telecaller.leads });
     } catch (err) {
         console.error(err);
@@ -125,12 +133,66 @@ const login = async (req, res) => {
         res.status(500).json({ message: "Error logging in", error: err });
     }
 };
-
-
+const addnotestotelecallerandlead = async (req, res) => {
+    console.log(req.body);
+    const { telecallerId, leadId, note, status } = req.body;
+    const Telecaller = req.db.model("Telecaller");
+    const Lead = req.db.model("Lead");
+  
+    try {
+      const telecaller = await Telecaller.findById(telecallerId);
+      if (!telecaller) {
+        return res.status(404).json({ message: "Telecaller not found." });
+      }
+  
+      const newHistory = {
+        leadId,
+        action: "Added a note",
+        notes: note,
+      };
+  
+      telecaller.history.push(newHistory);
+      await telecaller.save();
+  
+      const lead = await Lead.findById(leadId);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found." });
+      }
+  
+      let statusChangeNote = "";
+      if (status && lead.status !== status) {
+        statusChangeNote = `Status changed from '${lead.status}' to '${status}'.`;
+        lead.status = status;
+      }
+  
+      const newNote = {
+        note: statusChangeNote ? `${note} (${statusChangeNote})` : note, 
+        telecallerId: telecallerId,
+      };
+  
+      lead.notes.push(newNote);
+      await lead.save();
+  
+      res.status(200).json({
+        message: "Note added and status updated for both Telecaller and Lead.",
+        lead: lead,
+      });
+    } catch (error) {
+      console.error("Error while adding note and updating status:", error);
+      res.status(500).json({
+        message: "Error while adding note and updating status.",
+        error: error.message,
+      });
+    }
+  };
+  
+  
+  
 
 module.exports = {
     updateLeadResult,
     getAssignedLeads,
     getTelecallerHistory,
-    login
+    login,
+    addnotestotelecallerandlead
 };
