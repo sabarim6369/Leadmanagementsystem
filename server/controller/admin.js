@@ -317,72 +317,61 @@ const assignallleads = async (req, res) => {
             return res.status(400).json({ message: "No active telecallers available." });
         }
 
-        telecallers.sort((a, b) => a.pending - b.pending || a.leads.length - b.leads.length);
+        let newTelecallers = telecallers.filter(tc => tc.leads.length === 0);
+        let experiencedTelecallers = telecallers.filter(tc => tc.leads.length > 0);
 
-        const totalLeadsToAssign = unassignedLeads.length;
+        console.log("New Telecallers:", newTelecallers.length);
+        console.log("Experienced Telecallers:", experiencedTelecallers.length);
+
         let leadIndex = 0;
 
-        const baseTarget = Math.floor(totalLeadsToAssign / telecallers.length); 
-        let remainder = totalLeadsToAssign % telecallers.length; 
+        if (newTelecallers.length > 0) {
+            const baseTarget = Math.floor(unassignedLeads.length / newTelecallers.length);
+            let remainder = unassignedLeads.length % newTelecallers.length;
 
-        for (let i = 0; i < telecallers.length; i++) {
-            const telecaller = telecallers[i];
-            let target = baseTarget;
+            for (let i = 0; i < newTelecallers.length; i++) {
+                const telecaller = newTelecallers[i];
+                let target = baseTarget + (remainder > 0 ? 1 : 0);
+                remainder = Math.max(remainder - 1, 0);
 
-            if (telecaller.pending > 0) {
-                target = Math.max(target - 1, 0); 
+                if (target <= 0) continue;
+
+                const assignedLeads = unassignedLeads.slice(leadIndex, leadIndex + target);
+                leadIndex += target;
+
+                if (assignedLeads.length > 0) {
+                    const leadIds = assignedLeads.map(lead => lead._id);
+
+                    await Leads.updateMany(
+                        { _id: { $in: leadIds } },
+                        {
+                            $push: { assignedTo: telecaller._id },
+                            $set: { status: 'assigned' }
+                        }
+                    );
+
+                    await Telecallers.updateOne(
+                        { _id: telecaller._id },
+                        { 
+                            $push: { leads: { $each: leadIds } },
+                            $inc: { pending: target } 
+                        }
+                    );
+                }
             }
-
-            if (remainder > 0) {
-                target++;
-                remainder--; 
-            }
-
-            if (target <= 0) {
-                console.log(`Telecaller ${telecaller.username} has enough leads already, skipping.`);
-                continue;
-            }
-
-            const assignedLeads = unassignedLeads.slice(leadIndex, leadIndex + target);
-            leadIndex += target;
-
-            if (assignedLeads.length > 0) {
-                const leadIds = assignedLeads.map(lead => lead._id);
-
-                await Leads.updateMany(
-                    { _id: { $in: leadIds } },
-                    {
-                        $push: { assignedTo: telecaller._id },
-                        $set: { status: 'assigned' }
-                    }
-                );
-
-                await Telecallers.updateOne(
-                    { _id: telecaller._id },
-                    { 
-                        $push: { leads: { $each: leadIds } },
-                        $inc: { pending: target } 
-                    }
-                );
-            }
-
-            if (leadIndex >= totalLeadsToAssign) break;
         }
 
-        if (leadIndex < totalLeadsToAssign) {
-            console.log("Some leads are still unassigned, reassigning remaining leads.");
+        if (leadIndex < unassignedLeads.length && experiencedTelecallers.length > 0) {
+            console.log("Distributing remaining leads to experienced telecallers");
 
-            const remainingLeads = unassignedLeads.slice(leadIndex);
-            const remainingTelecallers = telecallers.filter(tc => tc.pending <= 0); // Only give to telecallers with no pending leads
+            experiencedTelecallers.sort((a, b) => a.pending - b.pending);
 
-            if (remainingTelecallers.length === 0) {
-                remainingTelecallers.push(...telecallers);
-            }
-
+            let remainingLeads = unassignedLeads.slice(leadIndex);
             let remainingIndex = 0;
+
             for (let i = 0; i < remainingLeads.length; i++) {
                 const lead = remainingLeads[i];
-                const telecaller = remainingTelecallers[remainingIndex];
+                const telecaller = experiencedTelecallers[remainingIndex];
 
                 await Leads.updateOne(
                     { _id: lead._id },
@@ -391,7 +380,7 @@ const assignallleads = async (req, res) => {
                         $set: { status: 'assigned' }
                     }
                 );
-                
+
                 await Telecallers.updateOne(
                     { _id: telecaller._id },
                     { 
@@ -399,9 +388,8 @@ const assignallleads = async (req, res) => {
                         $inc: { pending: 1 }
                     }
                 );
-                
 
-                remainingIndex = (remainingIndex + 1) % remainingTelecallers.length; // Cycle through available telecallers
+                remainingIndex = (remainingIndex + 1) % experiencedTelecallers.length;
             }
         }
 
@@ -411,6 +399,7 @@ const assignallleads = async (req, res) => {
         res.status(500).json({ message: "Failed to assign leads.", error: error.message });
     }
 };
+
 
 
 
