@@ -57,6 +57,13 @@ const leadSchema = new mongoose.Schema({
       },
     },
   ],
+  callbackTime: {
+    type: Date,
+  },
+  callbackScheduled: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = leadSchema;

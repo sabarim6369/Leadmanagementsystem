@@ -226,38 +226,83 @@ const assignleads = async (req, res) => {
         res.status(500).json({ message: "Error assigning lead", error: err.message });
     }
 };
-
-
 const swapleads = async (req, res) => {
+    console.log("Starting lead redistribution process...");
+
+    const Leads = req.db.model("Lead");
+    const Telecallers = req.db.model("Telecaller");
+
     try {
-        const { telecallerId1, telecallerId2, leadId } = req.body;
+        // Fetch all active telecallers
+        const activeTelecallers = await Telecallers.find({ status: 'active' });
 
-        if (!telecallerId1 || !telecallerId2 || !leadId) {
-            return res.status(400).json({ message: "Please provide both telecaller IDs and lead ID." });
+        if (activeTelecallers.length === 0) {
+            return res.status(400).json({ message: "No active telecallers available." });
         }
 
-        const telecaller1 = await Telecaller.findById(telecallerId1);
-        const telecaller2 = await Telecaller.findById(telecallerId2);
-        const lead = await Lead.findById(leadId);
+        // Fetch all leads (from all telecallers)
+        const allLeads = await Leads.find();
 
-        if (!telecaller1 || !telecaller2 || !lead) {
-            return res.status(404).json({ message: "One or more records not found." });
+        if (allLeads.length === 0) {
+            return res.status(400).json({ message: "No leads to redistribute." });
         }
 
-        telecaller1.leads = telecaller1.leads.filter(leadId => leadId.toString() !== lead._id.toString());
-        await telecaller1.save();
+        console.log(`Total Leads to Redistribute: ${allLeads.length}`);
 
-        telecaller2.leads.push(lead._id);
-        await telecaller2.save();
+        // Unassign all leads from everyone
+        await Leads.updateMany(
+            {},
+            { $set: { assignedTo: [] } }
+        );
 
-        lead.assignedTo = lead.assignedTo.filter(telecallerId => telecallerId.toString() !== telecaller1._id.toString());
-        lead.assignedTo.push(telecaller2._id);
-        await lead.save();
+        // Reset pending leads and leads array for all telecallers
+        await Telecallers.updateMany(
+            {},
+            { $set: { pending: 0, leads: [] } }
+        );
 
-        res.status(200).json({ message: "Leads swapped successfully." });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Error swapping leads", error: err });
+        // Redistribute all leads among active telecallers
+        const totalLeads = allLeads.length;
+        const telecallerCount = activeTelecallers.length;
+        const baseLeadsPerTelecaller = Math.floor(totalLeads / telecallerCount);
+        let extraLeads = totalLeads % telecallerCount;
+
+        // Sort telecallers to prioritize those with fewer leads (though all are 0 now)
+        activeTelecallers.sort((a, b) => a.pending - b.pending);
+
+        let leadIndex = 0;
+
+        for (let i = 0; i < activeTelecallers.length; i++) {
+            const telecaller = activeTelecallers[i];
+            const numLeads = baseLeadsPerTelecaller + (extraLeads > 0 ? 1 : 0);
+            extraLeads = Math.max(extraLeads - 1, 0);
+
+            if (numLeads > 0) {
+                const leadsChunk = allLeads.slice(leadIndex, leadIndex + numLeads);
+                leadIndex += numLeads;
+                const leadIds = leadsChunk.map(lead => lead._id);
+
+                // Assign leads to the current telecaller
+                await Leads.updateMany(
+                    { _id: { $in: leadIds } },
+                    { $set: { assignedTo: [telecaller._id], status: 'assigned' } }
+                );
+
+                // Update telecaller's leads and pending count
+                await Telecallers.updateOne(
+                    { _id: telecaller._id },
+                    {
+                        $push: { leads: { $each: leadIds } },
+                        $inc: { pending: numLeads }
+                    }
+                );
+            }
+        }
+
+        res.status(200).json({ message: "All leads redistributed equally among active telecallers." });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ message: "Failed to redistribute leads.", error: error.message });
     }
 };
 

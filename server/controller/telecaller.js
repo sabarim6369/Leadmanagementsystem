@@ -51,11 +51,11 @@ const getAssignedLeads = async (req, res) => {
 const Telecaller = req.db.model("Telecaller");
 const telecaller = await Telecaller.findById(telecallerId).populate({
     path: "leads",
-    select: "name mobilenumber status notes",
+    select: "name mobilenumber status notes callbackTime",
     populate: {
         path: "notes.telecallerId",
-        model: "Telecaller",  // Ensure this matches your model name
-        select: "username",        // Get only the name of the telecaller
+        model: "Telecaller", 
+        select: "username",      
     },
 });
 
@@ -135,7 +135,7 @@ const login = async (req, res) => {
 };
 const addnotestotelecallerandlead = async (req, res) => {
     console.log(req.body);
-    const { telecallerId, leadId, note, status } = req.body;
+    const { telecallerId, leadId, note, status, callbackTime } = req.body;
     const Telecaller = req.db.model("Telecaller");
     const Lead = req.db.model("Lead");
   
@@ -166,11 +166,18 @@ const addnotestotelecallerandlead = async (req, res) => {
       }
   
       const newNote = {
-        note: statusChangeNote ? `${note} (${statusChangeNote})` : note, 
+        note: statusChangeNote ? `${note} (${statusChangeNote})` : note,
         telecallerId: telecallerId,
       };
   
       lead.notes.push(newNote);
+  
+      // Check if callbackTime is provided and store it
+      if (callbackTime) {
+        lead.callbackTime = new Date(callbackTime);
+        lead.callbackScheduled = true; // Update the callbackScheduled flag to true
+      }
+  
       await lead.save();
   
       res.status(200).json({
@@ -185,7 +192,6 @@ const addnotestotelecallerandlead = async (req, res) => {
       });
     }
   };
-  
   
   
 

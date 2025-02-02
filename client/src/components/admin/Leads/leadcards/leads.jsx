@@ -29,9 +29,10 @@ const Leadscard=({telecallerdata,viewmore,Assignleads})=>{
               <p>+{telecaller.mobilenumber}</p>
             </div>
             <div className="flex items-center text-gray-300">
-              <i className="fa fa-envelope text-blue-400 text-lg mr-2"></i>
-              <p>{telecaller.assignedTo?.email}</p>
-            </div>
+  <i className="fa fa-envelope text-blue-400 text-lg mr-2"></i>
+  <p>Assigned To: {telecaller.assignedTo && telecaller.assignedTo[0] ? telecaller.assignedTo[0].email : "Not Assigned"}</p>
+</div>
+
           </div>
           <div className="flex justify-between">
             <button

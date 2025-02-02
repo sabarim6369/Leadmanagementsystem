@@ -165,6 +165,21 @@ const Leads = () => {
       console.error("Error:", error);
     }
   };
+  const swapleads=async()=>{
+    try {
+      const response = await axios.put(
+        "http://localhost:8000/api/admin/swapallleads",
+        {},
+        { headers: { "database": databasename } }
+      );
+
+      toast.success(response.data.message || "Leads swapped successfully.");
+      await fetchLeads();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to swap leads.");
+      console.error("Error:", error);
+    }
+  }
 
   const closeImportPopup = () => {
     setImportPopup(false);
@@ -237,6 +252,7 @@ const Leads = () => {
               add={add}
               openImportPopup={openImportPopup}
               openassignleads={openassignleads}
+              swapleads={swapleads}
             />
           </div>
         </div>

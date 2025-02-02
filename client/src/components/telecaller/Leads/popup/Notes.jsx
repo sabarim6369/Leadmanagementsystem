@@ -8,6 +8,7 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
   const [newNote, setNewNote] = useState("");
   const [status, setStatus] = useState(leadfornotes?.status || "unassigned");
   const [isStatusEditable, setIsStatusEditable] = useState(true);
+  const [callbackTime, setCallbackTime] = useState(null); 
 
   useEffect(() => {
     setStatus(leadfornotes?.status || "unassigned");
@@ -15,6 +16,7 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
 
   const handleNoteChange = (event) => setNewNote(event.target.value);
   const handleStatusChange = (event) => setStatus(event.target.value);
+  const handleCallbackTimeChange = (event) => setCallbackTime(event.target.value); 
 
   const saveNotes = async () => {
     try {
@@ -25,6 +27,7 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
           leadId: leadfornotes?._id,
           note: newNote,
           status: status,
+          callbackTime: callbackTime ? new Date(callbackTime) : null,
         },
         { headers: { database: databasename } }
       );
@@ -40,8 +43,6 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
-
-        {/* Header */}
         <div className="flex justify-between items-center border-b pb-3">
           <h2 className="text-lg font-semibold">{leadfornotes?.name}</h2>
           <button onClick={() => setopennotespopup(false)} className="text-gray-600">
@@ -49,7 +50,14 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
           </button>
         </div>
 
-        {/* Existing Notes */}
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">
+            {leadfornotes?.callbackTime ? 
+              `Scheduled Callback: ${new Date(leadfornotes.callbackTime).toLocaleString()}` : 
+              "No callback scheduled"}
+          </h3>
+        </div>
+
         {leadfornotes?.notes?.length > 0 ? (
           <div className="mt-4 p-3 bg-gray-100 rounded-lg max-h-40 overflow-y-auto">
             <h3 className="text-sm font-medium flex items-center">
@@ -71,7 +79,6 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
           <p className="text-sm text-gray-500 mt-3">No notes available for this lead.</p>
         )}
 
-        {/* Note Input */}
         <div className="mt-4">
           <textarea
             className="w-full p-3 border rounded-md text-sm"
@@ -82,7 +89,6 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
           />
         </div>
 
-        {/* Status Dropdown */}
         <div className="mt-4">
           <label className="block text-sm text-gray-700">Change Status:</label>
           <select
@@ -99,7 +105,16 @@ const Notes = ({ setopennotespopup, leadfornotes, databasename, telecallerid }) 
           </select>
         </div>
 
-        {/* Action Buttons */}
+        <div className="mt-4">
+          <label className="block text-sm text-gray-700">Set Callback Time:</label>
+          <input
+            type="datetime-local"
+            className="w-full p-2 mt-1 border rounded-md text-sm"
+            value={callbackTime}
+            onChange={handleCallbackTimeChange}
+          />
+        </div>
+
         <div className="flex justify-end mt-4 space-x-3">
           <button
             onClick={() => setopennotespopup(false)}
